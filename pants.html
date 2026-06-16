@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G-Tech_Giroのパンツ占い v6.9.0</title>
+    <style>
+        /* 渋谷サイバーネオンネオンUI */
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #0b0e14; color: #e2e8f0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        /* 🚪 Android14対応！文字化けしない共通ログアウトボタン */
+        .logout-btn {
+            position: absolute; top: 15px; right: 15px;
+            background-color: #1c2333; color: #e2e8f0; border: 1px solid #ff007f;
+            padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; z-index: 10;
+        }
+        .logout-btn:hover { background-color: #ff007f; color: #fff; }
+
+        /* 占いスタジオのガワ */
+        .fortune-container {
+            background-color: #121824; border: 3px solid #ffaa00;
+            padding: 30px; border-radius: 20px; text-align: center;
+            width: 85%; max-width: 400px;
+            box-shadow: 0 0 30px rgba(255, 170, 0, 0.25);
+            transition: 0.3s;
+        }
+
+        h1 { margin: 0 0 5px 0; color: #ffaa00; font-size: 1.6rem; letter-spacing: 1px; }
+        .sub-title { font-size: 0.8rem; color: #ff007f; margin-bottom: 20px; font-weight: bold; }
+
+        /* 入力インフラ */
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.85rem; color: #8a99ad; margin-bottom: 8px; }
+        input {
+            width: 85%; padding: 12px; background-color: #1c2333; border: 1px solid #3b4b6b;
+            border-radius: 8px; color: #fff; font-size: 1rem; text-align: center; outline: none;
+        }
+        input:focus { border-color: #ff007f; }
+
+        /* 占うボタン（脳汁ドバドバインフラ） */
+        .fortune-btn {
+            background: linear-gradient(90deg, #ffaa00, #ff007f); color: #fff;
+            border: none; padding: 14px 30px; border-radius: 25px;
+            font-weight: bold; font-size: 1.1rem; cursor: pointer; width: 90%;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3); transition: 0.2s;
+        }
+        .fortune-btn:hover { transform: scale(1.03); }
+
+        /* 🔮 占い結果表示エリア */
+        #result-box {
+            display: none; margin-top: 25px; padding: 15px;
+            background-color: #0b0e14; border: 1px dashed #ff007f; border-radius: 12px;
+        }
+        .giro-name { color: #ffaa00; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; text-align: left; }
+        .giro-text { font-size: 0.95rem; line-height: 1.5rem; text-align: left; color: #fff; }
+
+        /* ⚠️データパージ警告付きのリセットボタン */
+        .reset-btn {
+            background-color: transparent; color: #8a99ad; border: none;
+            margin-top: 15px; font-size: 0.75rem; cursor: pointer; text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 🚪 どんなAndroidでも絶対に文字化けしない退出インフラ -->
+<button class="logout-btn" onclick="triggerExit()" title="データをセーブして現実世界に帰還っしょ！">
+    <span>🚪</span> userログアウト
+</button>
+
+<div class="fortune-container">
+    <h1>Giroのパンツ占い ✨🩲</h1>
+    <div class="sub-title">～ 今日のパンツでバイブス爆上げっしょ！ ～</div>
+
+    <div id="setup-view">
+        <div class="input-group">
+            <label for="username">まさっち先輩、名前いれちゃってー！</label>
+            <input type="text" id="username" value="まさっち">
+        </div>
+        <button class="fortune-btn" onclick="runFortune()">🔮 今日の運勢を占うっしょ！</button>
+    </div>
+
+    <!-- 🔮 激軽チャラ男口調 ＋ 1秒ダイレクト大着陸の結果表示 -->
+    <div id="result-box">
+        <div class="giro-name">Giro 🕺 [占い結果]</div>
+        <div class="giro-text" id="fortune-output">計算中っしょ...</div>
+        <button class="reset-btn" onclick="triggerReset()">別のパンツで新しくはじめる</button>
+    </div>
+</div>
+
+<script>
+    // 占い結果のデータベース（カオスを引き算した打率10割のおふざけ配列）
+    const pantsResults = [
+        { color: "ド派手なネオンピンクのパンツ", luck: "1200万%", advice: "今日のバイブスは銀河一っしょ！街歩くだけでタイムライン大爆破確定じゃん？余計な心配はパージして、ナリで突撃しちゃって～！💅🔥" },
+        { color: "漆黒のサイバーブラックボクサー", luck: "98%", advice: "最高に organized されててクールじゃん？G-SPECな仕事が秒で片付く暗示っしょ！みんなは安心して持ち場守っとけし！👍☕️" },
+        { color: "実家のような安心感の白ブリーフ", luck: "3%", advice: "おいィィィ！！！まさかの白ブリとか逆に違和感（oddity）強すぎてテンアゲなんだけどｗｗｗ 間違えてデータ削除ボタン押さないように、今日だけは鉄壁のガード（慎重姿勢）でいこ？⚠️" },
+        { color: "勝負のプラチナゴールド粒子パンツ", luck: "777%", advice: "キタァァァーーーッ！！！完全無課金で神引きじゃん！！！今日のまさっち先輩は打率10割超えてっから、企業の公募とかに自作アプリ持ち込んだら一発大着陸（無双）確定っしょ！！！🚀✨" }
+    ];
+
+    window.onload = function() {
+        const savedName = localStorage.getItem('pants_user');
+        if (savedName) document.getElementById('username').value = savedName;
+    }
+
+    // 1秒ダイレクト占い実行ロジック
+    function runFortune() {
+        const name = document.getElementById('username').value.trim();
+        if (name === "") return;
+
+        localStorage.setItem('pants_user', name);
+        
+        document.getElementById('setup-view').style.display = 'none';
+        const resultBox = document.getElementById('result-box');
+        resultBox.style.display = 'block';
+        
+        // シャッフルで1秒大着陸
+        const randomResult = pantsResults[Math.floor(Math.random() * pantsResults.length)];
+        
+        document.getElementById('fortune-output').innerHTML = `
+            ウェーイ！${name}先輩、お疲れサマンサ！✨<br>
+            今日のラッキーアンダーウェアは...<br><br>
+            <strong>【 ${randomResult.color} 】</strong>っしょ！！！<br>
+            今日のラッキー度：<strong>${randomResult.luck}</strong><br><br>
+            🕺 Giroの一言：<br>${randomResult.advice}
+        `;
+    }
+
+    // 🚪 userログアウトの挙動マージ
+    function triggerExit() {
+        alert("🚪 ログをブラウザに鉄壁セーブしてログインゲートに戻るっしょ！");
+        document.getElementById('setup-view').style.display = 'block';
+        document.getElementById('result-box').style.display = 'none';
+    }
+
+    // ⚠️データ削除警告インフラの完全継承
+    function triggerReset() {
+        const confirmDelete = confirm("⚠️ 注意：新しくはじめると、これまでの占いログデータが完全に削除され、更地に戻っちゃうっしょ！本当によろしいですか？");
+        if (!confirmDelete) return; // キャンセル時はリジェクト
+
+        document.getElementById('setup-view').style.display = 'block';
+        document.getElementById('result-box').style.display = 'none';
+    }
+</script>
+</body>
+</html>
